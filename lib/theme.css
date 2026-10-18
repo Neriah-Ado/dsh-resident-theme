@@ -1,0 +1,77 @@
+/*
+ * Red Queen interface theme for DeepSeek Harness.
+ *
+ * Same strategy as any resilient dsh theme: override design tokens only —
+ * never component class names — so the app's own light/dark switch keeps
+ * working and layout changes between releases do not break it. Selectors use
+ * `html body` to outrank the theme plugin's `:root` and `body` declarations
+ * whatever the load order. Alias tokens declared on body resolve against the
+ * replaced palette steps, so one palette swap re-colours the whole interface.
+ *
+ *   neutral-bluish-*  cool greys  → clinical white / carbon black
+ *   deepseek-*        brand blue  → Red Queen crimson (Umbrella-lab red)
+ *   radius + shape    soft squircle → chamfered containment corners
+ */
+
+html body,
+html body[data-ds-dark-theme] {
+  /* Clinical neutral scale. Light mode reads the low steps (lab white),
+     dark mode the high steps (carbon black); the contrast ladder of the
+     original palette is preserved step for step. */
+  --dsw-static-neutral-bluish-00: #fdfdfe;
+  --dsw-static-neutral-bluish-50: #f8f8fa;
+  --dsw-static-neutral-bluish-60: #f3f3f6;
+  --dsw-static-neutral-bluish-75: #eeeff2;
+  --dsw-static-neutral-bluish-100: #e9eaee;
+  --dsw-static-neutral-bluish-150: #e3e4e9;
+  --dsw-static-neutral-bluish-200: #d9dade;
+  --dsw-static-neutral-bluish-300: #c9cad1;
+  --dsw-static-neutral-bluish-400: #adaeb7;
+  --dsw-static-neutral-bluish-500: #95969f;
+  --dsw-static-neutral-bluish-600: #7d7e88;
+  --dsw-static-neutral-bluish-700: #606169;
+  --dsw-static-neutral-bluish-750: #47484f;
+  --dsw-static-neutral-bluish-800: #393a41;
+  --dsw-static-neutral-bluish-850: #2d2e35;
+  --dsw-static-neutral-bluish-875: #25262c;
+  --dsw-static-neutral-bluish-900: #1d1e24;
+  --dsw-static-neutral-bluish-950: #17181d;
+  --dsw-static-neutral-bluish-1000: #121317;
+
+  /* Red Queen crimson in place of the DeepSeek blue brand scale: links, info
+     buttons, the user's message bubble, the active sidebar item. */
+  --dsw-static-deepseek-50: #fdf1f3;
+  --dsw-static-deepseek-100: #fadde1;
+  --dsw-static-deepseek-200: #f5bcc4;
+  --dsw-static-deepseek-300: #ee8e9b;
+  --dsw-static-deepseek-400: #f25f72;
+  --dsw-static-deepseek-450: #ee4459;
+  --dsw-static-deepseek-500: #c8102e;
+  --dsw-static-deepseek-600: #a30d26;
+  --dsw-static-deepseek-700-delete: #7f0f20;
+  --dsw-static-deepseek-800: #4d0915;
+  --dsw-static-deepseek-900: #310910;
+
+  /* Containment-grade geometry: tight radii cut as chamfers. */
+  --dsw-radius-xs: 2px;
+  --dsw-radius-sm: 4px;
+  --dsw-radius-md: 6px;
+  --dsw-radius-lg: 8px;
+  --dsw-radius-xl: 10px;
+  --dsw-radius-panel: 12px;
+  --dsw-corner-shape: bevel;
+
+  --dsw-alias-bg-document-selection: color-mix(in srgb, var(--dsw-static-deepseek-500) 30%, transparent);
+}
+
+/* The "deep diving" (thinking) label mixed the brand with navy; keep it in
+   the crimson family instead of turning muddy. */
+html body {
+  --dsw-alias-label-deep-diving: color-mix(in srgb, var(--dsw-static-deepseek-500) 80%, var(--dsw-static-neutral-bluish-1000));
+  --dsw-alias-label-deep-diving-shimmer: color-mix(in srgb, var(--dsw-static-deepseek-500) 32%, var(--dsw-static-neutral-bluish-00));
+}
+
+html body[data-ds-dark-theme] {
+  --dsw-alias-label-deep-diving: color-mix(in srgb, var(--dsw-static-deepseek-400) 72%, var(--dsw-static-neutral-bluish-400));
+  --dsw-alias-label-deep-diving-shimmer: color-mix(in srgb, var(--dsw-static-deepseek-300) 60%, var(--dsw-static-deepseek-400));
+}
