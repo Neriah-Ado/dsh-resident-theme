@@ -25,8 +25,10 @@ DeepSeek Harness 的《生化危机》红后风格主题，包括开屏动画、
 ### 在插件页安装
 
 1. 在 Harness 侧栏点击 **插件**，然后点击 **添加插件**。
-2. 输入本仓库的绝对路径（或 `github:Neriah-Ado/dsh-resident-theme`），点击 **安装**。安装完成后，点击 **立即启用**。
+2. 输入本仓库的绝对路径（或远程源 `github:Neriah-Ado/dsh-resident-theme`；远程安装建议固定到 commit，如 `github:Neriah-Ado/dsh-resident-theme#<40 位 commit SHA>`，也可用 release tag，但 tag 可能被移动），点击 **安装**。安装完成后，点击 **立即启用**。
 3. 完全退出 Harness，然后重新打开。
+
+> **供应链提示**：远程安装会在 Harness 网页界面里执行本包的 JavaScript，与本页面共享会话能力。建议 pin 到 release tag 或 commit SHA，不要安装来源不明的 fork 或镜像；品牌标记在注入前会经白名单校验（`lib/index.js`），但开屏脚本与浏览器端代码属于可信代码，**pin 住版本才是真正的信任边界**。
 
 ### 让 dsh agent 安装
 
@@ -42,6 +44,9 @@ dsh plugin --profile desktop add "<本仓库绝对路径>"
 
 # 网页版（先停止正在运行的 dsh web）
 dsh plugin --profile web add "<本仓库绝对路径>"
+
+# 远程安装（推荐 pin 到 commit 或 release tag）
+dsh plugin --profile desktop add "github:Neriah-Ado/dsh-resident-theme#<40 位 commit SHA>"
 ```
 
 ### 确认安装成功

@@ -10,7 +10,7 @@ A DeepSeek Harness (dsh) **bundle** that plays a Resident Evil Red Queen style b
 | Plugin entry id | `redqueen-splash` |
 | Version | see `package.json` |
 | Install source (local) | absolute path of this repository root — the directory containing this file. Get it with `pwd`; it may contain spaces. Prefer this when you are working inside a clone. |
-| Install source (remote) | `github:Neriah-Ado/dsh-resident-theme` |
+| Install source (remote) | `github:Neriah-Ado/dsh-resident-theme`. Prefer pinning a ref: `github:Neriah-Ado/dsh-resident-theme#<40-char-commit-sha>` (a release tag also works, but tags can be moved). Never install from a fork or an unverified URL. |
 | DSH peer dependencies | `@deepseek-ai/schemastery` (optional) → never request or grant a version exemption for anything else |
 | Install scripts | none → never pass `approvedBuilds` |
 | Takes effect | on the next app launch; the splash plays once per launch |
@@ -24,6 +24,8 @@ A DeepSeek Harness (dsh) **bundle** that plays a Resident Evil Red Queen style b
 3. Tell the user to fully quit DeepSeek Harness (⌘Q on macOS, close on Windows) and reopen it to see the splash.
 
 Each call asks the user for approval; that is expected. If `plugin_manager` is not available in this session, do not edit profile files by hand. Tell the user to either switch the session to the **Creator** preset or install from the sidebar: **插件 → 添加插件**, paste the repository path, then **立即启用** and restart.
+
+Remote installs run bundle JavaScript inside the Harness web UI, which shares the UI's session capabilities. Pin a commit SHA (or a release tag) when installing from GitHub, and do not install from a fork or an unverified URL. The brand markup is allowlist-validated before injection (`lib/index.js`), but the splash script and client half are trusted code: the pin is the real trust boundary.
 
 ## Install from a shell (other coding agents)
 
@@ -74,11 +76,12 @@ Use `plugin_manager` `{ "action": "remove_bundle", "target": "dsh-redqueen-splas
 - Modify anything inside the installed DeepSeek Harness app bundle (signed, integrity-checked).
 - Hand-edit `~/.dsh/profiles/*/package.json` or `pnpm-workspace.yaml`.
 - Grant version exemptions, or pass `approvedBuilds`.
+- Install the remote bundle unpinned for someone else's profile; pin a commit or release tag instead.
 
 ## Development
 
 - `cordis.patch.yml` must not carry a `config` block: defaults live in the `Config` schema in `lib/index.js`. dsh copies the whole merged config into the user layer on the first save, so a bundle-level block would mark every field as overridden.
-- `lib/index.js`: host half. It validates config (`resolveConfig`) and injects a style row and a body script through the `webserver/index-inject` event (`buildInjections`), so the splash appears before the shell boots. Inline JSON escapes `<`, U+2028 and U+2029.
+- `lib/index.js`: host half. It validates config (`resolveConfig`) and injects a style row and a body script through the `webserver/index-inject` event (`buildInjections`), so the splash appears before the shell boots. Inline JSON escapes `<`, U+2028 and U+2029. `isAllowedBrandMarkup` allowlist-validates every brand asset (`lib/brand/*`) before it reaches the browser's `dangerouslySetInnerHTML`; unknown tags/attributes, event handlers, `javascript:`/`data:` URLs, external `url(...)` and entity references drop the whole asset so the UI falls back to the official brand marks.
 - Host config is a schemastery `Config` (all fields `.volatile()`), read on every index render; `@deepseek-ai/schemastery` is an optional peer resolved from the dsh runtime.
 - `lib/theme.css`: interface theme, `--dsw-*` token overrides only (never component class names), `html body` selectors to win the cascade against the theme plugin. `lib/brand/`: `mark-octagon.svg`, `mark-eye.svg` (optional `hero-<logo>.svg`), `name.html`; injected as `globalThis.__RQ_BRAND__` and consumed by the client's `sidebar.brand.*` and `conversation.hero.brand.mark` slots. The bundle patch disables `ui-brand-official` to free those slots.
 - `lib/client.js`: browser half in the shipped `window.__ModuleLoader__.load` format, no build step. Occupies `sidebar.brand.mark`, `sidebar.brand.name`, `conversation.hero.brand.mark`, the Plugins-page `plugins.row.config` page (scope `redqueen-splash` via `ctx.configForms`), and the `/redqueen` popup command (`ctx.commandUi`). Locale namespace: `redqueenSplash`, registered as `{ zh, en }` with strict key parity.

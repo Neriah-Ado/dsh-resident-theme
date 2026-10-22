@@ -81,6 +81,37 @@ ok('host: html terminators escaped', !scriptRow.text.includes('</script'));
 ok('host: no raw config injection without uiTheme',
   host.buildInjections({ ...host.DEFAULTS, uiTheme: false }, { css: 'c', js: 'j', themeCss: 't' }).length === 2);
 
+// ---- 2b. brand markup allowlist (D-01) -------------------------------------
+// The brand HTML reaches dangerouslySetInnerHTML in the browser half, so the
+// host validates it against an allowlist and fails closed (asset becomes '').
+
+ok('brand: shipped SVG mark accepted',
+  host.isAllowedBrandMarkup('<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M0 0" fill="currentColor"/></svg>'));
+ok('brand: shipped name.html markup accepted',
+  host.isAllowedBrandMarkup('<b style="font-weight:800">DEEPSEEK</b><span>HARNESS</span><i style="display:inline-block"></i>'));
+for (const asset of ['mark-octagon.svg', 'mark-eye.svg', 'mark-seal.svg', 'name.html']) {
+  ok(`brand: shipped ${asset} passes allowlist`,
+    host.isAllowedBrandMarkup(readFileSync(join(lib, 'brand', asset), 'utf8')));
+}
+ok('brand: script tag rejected', !host.isAllowedBrandMarkup('<svg><script>alert(1)</script></svg>'));
+ok('brand: event handler rejected', !host.isAllowedBrandMarkup('<svg onload="alert(1)"/>'));
+ok('brand: foreignObject rejected', !host.isAllowedBrandMarkup('<svg><foreignObject><img src="x"/></foreignObject></svg>'));
+ok('brand: unknown tag rejected', !host.isAllowedBrandMarkup('<iframe src="https://x.example"></iframe>'));
+ok('brand: javascript: URL rejected', !host.isAllowedBrandMarkup('<svg><use href="javascript:alert(1)"/></svg>'));
+ok('brand: entity-encoded scheme rejected',
+  !host.isAllowedBrandMarkup('<svg><use href="java&#115;cript:alert(1)"/></svg>'));
+ok('brand: external CSS url rejected',
+  !host.isAllowedBrandMarkup('<span style="background:url(https://x.example/a.png)"></span>'));
+ok('brand: unparseable markup rejected', !host.isAllowedBrandMarkup('<svg><g></svg> trailing <'));
+const dirty = host.buildInjections(
+  { ...host.DEFAULTS },
+  { css: 'c', js: 'j', brand: { mark: '<svg onload="x()"/>', hero: '<svg/>', name: '<script>x()</script>' } }
+);
+const dirtyBrand = JSON.parse(/__RQ_BRAND__=(.*?);globalThis.__RQ_SPLASH__/.exec(dirty.at(-1).text)[1]);
+ok('brand: unsafe mark dropped at injection', dirtyBrand.mark === '');
+ok('brand: unsafe name dropped at injection', dirtyBrand.name === '');
+ok('brand: safe hero kept at injection', dirtyBrand.hero === '<svg/>');
+
 const events = [];
 const warnings = [];
 const ctx = {

@@ -15,6 +15,11 @@
 - 幕间硬隔离：印记结束后经 `is-seal-done` 从绘制树整体移除（`display: none`）；欢迎页入场后经 `is-actb` 将第一幕永久隐藏。两个类在退场时依然生效，任何时机跳过或退场，已完成的幕都不会重新出现，两幕永不同屏。
 - 新增默认退场 `wipe`（垂帘）：第二幕播完前主界面绝无露出；结束后开屏化作整幅不透明幕布完全遮住客户端，自上而下分八段收起，主界面随幕布依次显现。时间轴新增 `done` 节拍，退场起点强制不早于第二幕完成；节拍整体前移压缩约 20%，默认时长降为 4000ms，退场动画全面缩短。
 
+### Security
+
+- 品牌 HTML 注入路径加固：`lib/index.js` 新增 `isAllowedBrandMarkup`，对 `lib/brand/*` 的 SVG/HTML 做标签与属性白名单校验；事件属性、`javascript:`/`data:` URL、外部 `url(...)`、实体编码、未知标签或无法解析的标记一律整份丢弃，浏览器端 `dangerouslySetInnerHTML` 回退到官方品牌标志。`scripts/test-host.mjs` 增加白名单回归用例。
+- 安装文档补充供应链提示：远程安装源 `github:Neriah-Ado/dsh-resident-theme` 建议 pin 到 release tag 或 commit SHA，避免上游分支更新或 tag 移动改变安装内容；`AGENTS.md` 的 Facts/安装说明同步。
+
 ### Changed in 0.2.0
 
 - 首发版本包含：红后风格开屏动画与四种退场（`iris` 红后之眼、`blast` 防爆门、`purge` 数据清洗、`signal` 信号丢失）、`--dsw-*` 界面主题、品牌标志替换（`octagon` / `eye`）、插件设置页与 `/redqueen` 命令、本地预览与离线自测。
