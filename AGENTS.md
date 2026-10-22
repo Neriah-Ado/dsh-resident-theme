@@ -1,6 +1,6 @@
 # AGENTS.md — dsh-redqueen-splash
 
-A DeepSeek Harness (dsh) **bundle** that plays a Resident Evil Red Queen style boot splash in the desktop app and in `dsh web`, re-themes the interface through design tokens, and replaces the brand marks. Read this before installing, configuring, removing, or changing it. Reply to the user in their language (the owner writes Chinese).
+A DeepSeek Harness (dsh) **bundle** that plays a Resident Evil Red Queen style boot splash in the desktop app and in `dsh web`, re-themes the interface through design tokens, and replaces the brand marks. Read this before installing, configuring, removing, or changing it. Reply to the user in their language (the owner writes Chinese). User-facing installation, configuration and licensing live in [README.md](README.md); this file is the agent-facing runbook, and implementation details live in [docs/development.md](docs/development.md).
 
 ## Facts
 
@@ -41,7 +41,9 @@ dsh plugin --profile desktop add "<absolute repository path>"
 
 ## Configure
 
-Prefer the UI: the config page (sidebar **插件** → this plugin → **配置**) or the `/redqueen` command; both save through dsh settings. The page saves each change immediately (text fields on blur or Enter), its single **恢复默认** button resets every changed field at once, and **预览开屏** plays the current settings. Otherwise, append an override to `~/.dsh/profiles/desktop/cordis.patch.yml` (web: `profiles/web/`) and keep the existing content. The override replaces the whole `config` block; omitted keys fall back to their defaults. Restart the app afterwards.
+Prefer the UI: the config page (sidebar **插件** → this plugin → **配置**) or the `/redqueen` command; both save through dsh settings. The page saves each change immediately (text fields on blur or Enter), its single **恢复默认** button resets every changed field at once, and **预览开屏** plays the current settings.
+
+The canonical option table (17 keys, defaults and allowed values) lives in [README.md](README.md#配置); do not duplicate it here. If a config file edit is unavoidable, append an override to `~/.dsh/profiles/desktop/cordis.patch.yml` (web: `profiles/web/`) and keep the existing content. The override replaces the whole `config` block; omitted keys fall back to their defaults. Restart the app afterwards.
 
 ```yaml
 - id: redqueen-splash
@@ -49,23 +51,6 @@ Prefer the UI: the config page (sidebar **插件** → this plugin → **配置*
     exit: iris
     duration: 5000
 ```
-
-| Key | Default | Allowed |
-| --- | --- | --- |
-| `enabled` | `true` | boolean — splash on launch (theme/brand unaffected) |
-| `uiTheme` | `true` | boolean — Red Queen interface theme |
-| `brand` | `true` | boolean — replace sidebar and conversation brand marks |
-| `logo` | `octagon` | `octagon` \| `eye` \| `seal` |
-| `title`, `subtitle`, `code` | `DEEPSEEK HARNESS`, `RED QUEEN MAINFRAME · SECURITY & SURVEILLANCE DIVISION`, `RQ-DSH/0.1` | strings, ≤ 80 chars |
-| `whisper` | `YOU ARE ALL GOING TO DIE DOWN HERE.` | string ≤ 80 chars; empty hides the ghost message |
-| `accentLight`, `accentDark` | `#c8102e`, `#ff3348` | quoted `#` hex, 3–8 digits |
-| `theme` | `auto` | `auto` \| `light` \| `dark` |
-| `intro` | `random` | `random` (rotates, never repeats the last one) \| `hive` \| `scan` \| `system` \| `lockdown` |
-| `exit` | `wipe` | `random` (never repeats the last one) \| `wipe` \| `blast` \| `purge` \| `signal` \| `iris` |
-| `duration` | `4000` | ms, 0–15000; the timeline scales with it |
-| `maxWait` | `8000` | ms, ≥ `duration`, ≤ 20000 |
-| `skippable` | `true` | boolean |
-| `replayOnReload` | `false` | boolean |
 
 ## Uninstall
 
@@ -80,18 +65,4 @@ Use `plugin_manager` `{ "action": "remove_bundle", "target": "dsh-redqueen-splas
 
 ## Development
 
-- `cordis.patch.yml` must not carry a `config` block: defaults live in the `Config` schema in `lib/index.js`. dsh copies the whole merged config into the user layer on the first save, so a bundle-level block would mark every field as overridden.
-- `lib/index.js`: host half. It validates config (`resolveConfig`) and injects a style row and a body script through the `webserver/index-inject` event (`buildInjections`), so the splash appears before the shell boots. Inline JSON escapes `<`, U+2028 and U+2029. `isAllowedBrandMarkup` allowlist-validates every brand asset (`lib/brand/*`) before it reaches the browser's `dangerouslySetInnerHTML`; unknown tags/attributes, event handlers, `javascript:`/`data:` URLs, external `url(...)` and entity references drop the whole asset so the UI falls back to the official brand marks.
-- Host config is a schemastery `Config` (all fields `.volatile()`), read on every index render; `@deepseek-ai/schemastery` is an optional peer resolved from the dsh runtime.
-- `lib/theme.css`: interface theme, `--dsw-*` token overrides only (never component class names), `html body` selectors to win the cascade against the theme plugin. `lib/brand/`: `mark-octagon.svg`, `mark-eye.svg` (optional `hero-<logo>.svg`), `name.html`; injected as `globalThis.__RQ_BRAND__` and consumed by the client's `sidebar.brand.*` and `conversation.hero.brand.mark` slots. The bundle patch disables `ui-brand-official` to free those slots.
-- `lib/client.js`: browser half in the shipped `window.__ModuleLoader__.load` format, no build step. Occupies `sidebar.brand.mark`, `sidebar.brand.name`, `conversation.hero.brand.mark`, the Plugins-page `plugins.row.config` page (scope `redqueen-splash` via `ctx.configForms`), and the `/redqueen` popup command (`ctx.commandUi`). Locale namespace: `redqueenSplash`, registered as `{ zh, en }` with strict key parity.
-- `lib/splash.css` and `lib/splash.js`: the splash itself; `globalThis.__redqueenSplash.replay({ exit })` replays it on demand. All CSS stays scoped under `#redqueen-splash` with an `rq-` prefix.
-  - Beats: `--B`, `--G`, `--R` in CSS must match `BEAT` in JS (`scripts/test-host.mjs` asserts this).
-  - Exits are registered in `EXITS`; boot intros in `INTROS` (rotation state in `localStorage['redqueen-splash:last-intro']`, exits in `...last-exit`); `fade` is the fallback. The reduced-motion setting always uses a plain fade and pins the intro to `hive`.
-  - The Umbrella-style seal is a programmatic vector rendering (`sealSvg()` in splash.js, `lib/brand/mark-seal.svg` for the sidebar); never ship official logo image assets.
-  - Exit handoff: `.is-leaving` makes the root transparent and powers the board down, so every exit ends by revealing the live app; keep new exits consistent with that contract (end transparent, no pop).
-  - Act isolation: `is-seal-done` (760ms) display-nones the seal and `is-actb` (act B entry) visibility-hides act A; both persist through `is-leaving`, so finished acts never repaint and never co-exist on screen. Any new act must gate its base visibility the same way.
-  - Idle loops use multiples of `--beat: 1.2s`.
-- Checks: `npm test` (no network, no child processes — safe in restricted environments). Preview with `npm run preview`, then open `http://localhost:4173/preview/`; the page has selectors for exit, theme and duration, and `R` replays.
-- Version control: work on a branch, merge with `--no-ff`, tag releases (`vX.Y.Z`), keep `package.json` `version` in sync.
-- Changelog: `CHANGELOG.md` follows Keep a Changelog; add entries under `[未发布]`.
+Implementation details, injection constraints, splash internals, preview and test instructions live in [docs/development.md](docs/development.md). Read it before changing `lib/`, `scripts/` or `cordis.patch.yml`; keep `CHANGELOG.md` updated under `[未发布]`.

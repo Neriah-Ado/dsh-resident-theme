@@ -1,15 +1,11 @@
-# 红后开屏动画
+# 红后开屏动画 — DeepSeek Harness 红后主题
 
-DeepSeek Harness 的《生化危机》红后风格主题，包括开屏动画、界面配色和品牌标志。
+红后开屏动画（包名 `dsh-redqueen-splash`，插件 id `redqueen-splash`）是 DeepSeek Harness 的第三方组合包，适用于桌面版和网页版。开屏、界面主题与品牌标志都换成了《生化危机》红后的视觉语言。
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-0.2.1--rc.2-e4002b.svg)](#环境要求)
 
-安装 · [界面主题与品牌标志](#界面主题与品牌标志) · [配置](#配置) · [开屏动画](#开屏动画) · [常见问题](#常见问题) · [开发](#开发)
-
 ## 简介
-
-红后开屏动画（`dsh-redqueen-splash`）是 DeepSeek Harness 的第三方组合包，适用于桌面版和网页版。
 
 安装后，每次启动 Harness 都会先播放一段约 4 秒的开屏动画，再进入主界面。开屏以安布雷拉风格的八边印记开场，四种启动动画（蜂巢握手、身份扫描、终端引导、封锁警报）每次轮换播放。主界面的配色、圆角和 Logo 也会换成红后风格。开屏动画、界面主题和品牌标志可以分别开关。
 
@@ -168,40 +164,12 @@ Harness 检测到启动异常时，会自动备份配置并停用第三方组合
 
 ## 开发
 
-### 工作原理
-
-- `lib/index.js` 运行在 Harness 的服务端，通过 `webserver/index-inject` 事件把界面主题、开屏样式和开屏脚本注入页面，因此开屏能在主界面加载之前出现。配置读取、校验与注入行构造见该文件，默认值在 `DEFAULTS`。
-- `lib/client.js` 运行在浏览器中，负责品牌标志、设置页面和 `/redqueen` 命令。为了替换标志，`cordis.patch.yml` 会停用官方的 `ui-brand-official` 插件。
-- `lib/splash.css` + `lib/splash.js` 是开屏本身；`globalThis.__redqueenSplash.replay({ exit })` 可按需重播。所有样式都限定在 `#redqueen-splash` 下，类名以 `rq-` 开头。
-- `lib/splash.js` 的 `BEAT` 与 `lib/splash.css` 顶部的 `--B`、`--G`、`--R` 定义同一组时间点，修改时必须同步（`scripts/test-host.mjs` 会校验）。
-- 循环动画的周期使用 1.2 秒（`--beat`）的整数倍。
-
-### 本地预览
-
-需要 Python 3。在本仓库目录运行：
-
-```bash
-npm run preview
-```
-
-然后在浏览器打开 <http://localhost:4173/preview/>。页面底部可以切换退场动画、深浅色和时长，按 <kbd>R</kbd> 重播。
-
-**离线单文件预览**：运行 `npm run preview:build` 会把样式与脚本全部内联，生成 `preview/standalone.html`——双击即可打开，无需服务器，也方便单独分享。注意它是构建产物，改动 `lib/` 后需要重新生成。
-
-### 测试
-
-需要 Node.js：
-
-```bash
-npm test
-```
-
-测试覆盖：三个 JS 文件的语法、配置解析与钳制、注入行的转义、模拟加载器下的插槽/命令/多语言注册，以及 JS 与 CSS 节拍常量的一致性。
-
-## 声明
-
-本项目是非官方的爱好者作品，与《生化危机》（Resident Evil / Biohazard）系列的权利方卡普空（Capcom）没有关联。设计参考了系列作品中的红后形象，所有图形均为原创或程序生成，不包含官方 Logo、角色或美术素材。《生化危机》及相关名称和标识归其权利人所有。
+开发、测试与本地预览说明见 [docs/development.md](docs/development.md)；Agent 安装与操作红线见 [AGENTS.md](AGENTS.md)。
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](LICENSE) · © 2026 Neriah
+
+本项目是非官方的爱好者作品，与《生化危机》（Resident Evil / Biohazard）系列的权利方卡普空（Capcom）没有关联。设计参考了系列作品中的红后形象，所有图形均为原创或程序生成，不包含官方 Logo、角色或美术素材。《生化危机》及相关名称和标识归其权利人所有。
+
+文档规范：[DOCS-STYLE](https://github.com/Neriah-Ado/Neriah-Ado/blob/main/docs/DOCS-STYLE.md)
