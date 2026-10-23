@@ -9,6 +9,8 @@
 
 安装后，每次启动 Harness 都会先播放一段约 4 秒的开屏动画，再进入主界面。开屏以安布雷拉风格的八边印记开场，四种启动动画（蜂巢握手、身份扫描、终端引导、封锁警报）每次轮换播放。主界面的配色、圆角和 Logo 也会换成红后风格。开屏动画、界面主题和品牌标志可以分别开关。
 
+界面主题提供四套生化危机风格的强调色预设（绯红、生化危害绿、T-病毒紫、保护伞红）和三种底色方案，还可以自定义颜色。空白会话页支持蜂巢网格、扫描线等背景；窗口从后台切回时会播放链路扫描、光圈或故障过渡动效。
+
 设计参考了《生化危机》系列中的红后（Red Queen）与保护伞公司（Umbrella）的视觉语言：蜂巢六边形、红色警报美学、全息监控终端，以及她的眼睛。保护伞印记与全部图形均为程序化矢量渲染，不内置任何官方图片素材；相关名称与标识归其权利人所有，本项目为非商业爱好者作品。
 
 ## 环境要求
@@ -61,7 +63,35 @@ dsh plugin --profile desktop remove dsh-redqueen-splash
 
 界面主题把默认的冷灰色调换成实验室白（浅色模式）和碳黑（深色模式），把 DeepSeek 蓝换成红后绯红，并把圆角改为切角。主题会跟随 Harness 的深浅色设置。它只修改 Harness 的设计变量，不改动具体组件，因此 Harness 更新后通常仍能正常显示。
 
-品牌标志会替换侧栏左上角和空白会话页中的 Logo，有三种样式可选：
+### 强调色
+
+主题提供四套强调色预设，每套都通过 OKLab 色彩混合自动派生完整色阶：
+
+| 预设 | 色值 | 灵感 |
+| --- | --- | --- |
+| `crimson`（默认） | `#c8102e` → `#ff3348` | 红后的核心配色，手工调校的绯红色阶 |
+| `biohazard` | `#a4c639` → `#c8e639` | 生化危害标志的荧光绿 |
+| `t-virus` | `#7b2d8e` → `#a855c7` | T-病毒的紫色光泽 |
+| `umbrella` | `#d42027` → `#f04048` | 保护伞公司的标志红 |
+| `custom` | 自选 | 通过取色器指定任意颜色 |
+
+### 底色
+
+| 方案 | 说明 |
+| --- | --- |
+| `clinical`（默认） | 实验室白 / 碳黑，红后的无菌质感 |
+| `carbon` | 中性灰底，更低调的工业风格 |
+| `official` | 保留 Harness 原生底色，仅叠加切角和强调色 |
+
+### 空白页背景
+
+空白会话页可选四种背景：蜂巢六边形网格（`hex`）、扫描线（`scanlines`）、完整开屏底（`full`）或关闭（`off`）；`random` 每次随机选择。
+
+### 切回动效
+
+窗口从后台切回时播放过渡动效：链路恢复扫描（`scan`）、六边形光圈（`iris`）或故障闪切（`glitch`）。触发条件可设为离开 30 秒后（`away`）、每次切回（`always`）或最小化/隐藏后（`hidden`）。
+
+### 品牌标志会替换侧栏左上角和空白会话页中的 Logo，有三种样式可选：
 
 - **隔离八角**（`octagon`，默认）：黑色切角八角块上的同心圆环，右上角带一个红色标记。
 - **后之眼**（`eye`）：分段外环包围的虹膜，中央是一枚红色瞳孔。
@@ -73,9 +103,9 @@ dsh plugin --profile desktop remove dsh-redqueen-splash
 
 ### 在 Harness 中设置
 
-在 **插件** 页面打开「红后开屏动画」，再点击同名组件，即可进入设置页面。修改会立即保存；页面底部的「恢复默认」会把所有改过的选项恢复为默认值；「预览开屏」按当前设置播放。
+在 **插件** 页面打开「红后开屏动画」，再点击同名组件，即可进入设置页面。设置页分为**开屏**、**文字**、**外观**、**动效**四个分节：外观分节包含强调色色板、自定义取色器和底色选项；动效分节包含切回动效和触发条件。修改会立即保存；页面底部的「恢复默认」会把所有改过的选项恢复为默认值；「预览开屏」按当前设置播放；「预览切回动效」立即播放切回过渡效果。
 
-在会话中输入 `/redqueen`，也可以预览开屏动画或修改常用选项。
+在会话中输入 `/redqueen`，也可以预览开屏动画或修改常用选项，包括强调色和底色预设。
 
 ### 编辑配置文件
 
@@ -86,6 +116,10 @@ dsh plugin --profile desktop remove dsh-redqueen-splash
   config:
     exit: iris
     duration: 5000
+    accent: biohazard
+    base: carbon
+    heroBackground: hex
+    resumeEffect: scan
 ```
 
 - 这里的 `config` 会整体替换默认配置，没有写出的选项会恢复为默认值。
@@ -97,7 +131,13 @@ dsh plugin --profile desktop remove dsh-redqueen-splash
 | `enabled` | `true` | 是否播放开屏动画。关闭后，界面主题和品牌标志不受影响 |
 | `uiTheme` | `true` | 是否使用红后界面主题 |
 | `brand` | `true` | 是否替换品牌标志 |
-| `logo` | `octagon` | 标志样式：`octagon`（隔离八角）或 `eye`（后之眼） |
+| `logo` | `octagon` | 标志样式：`octagon`（隔离八角）、`eye`（后之眼）或 `seal`（保护伞印记） |
+| `accent` | `crimson` | 强调色预设：`crimson`、`biohazard`、`t-virus`、`umbrella` 或 `custom` |
+| `accentColor` | `'#c8102e'` | 自定义强调色（仅 `accent` 为 `custom` 时生效），需为 `#RRGGBB` 格式 |
+| `base` | `clinical` | 底色方案：`clinical`、`carbon` 或 `official` |
+| `heroBackground` | `random` | 空白会话页背景：`random`、`hex`、`scanlines`、`full` 或 `off` |
+| `resumeEffect` | `random` | 切回动效：`random`、`scan`、`iris`、`glitch` 或 `off` |
+| `resumeTrigger` | `away` | 切回触发条件：`away`（离开 30 秒后）、`always`（每次切回）或 `hidden`（最小化/隐藏后） |
 | `title` | `DEEPSEEK HARNESS` | 开屏主标题，最多 80 个字符 |
 | `subtitle` | `RED QUEEN MAINFRAME · SECURITY & SURVEILLANCE DIVISION` | 开屏副标题，最多 80 个字符 |
 | `code` | `RQ-DSH/0.1` | 开屏角落显示的编号，最多 80 个字符 |

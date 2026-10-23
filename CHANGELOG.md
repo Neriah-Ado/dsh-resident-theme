@@ -8,6 +8,23 @@
 
 - 统一文档风格：README 去除与 AGENTS.md 重复的开发内容，开发说明下沉 `docs/development.md`；声明并入许可证并补版权行；CHANGELOG 标题与小节改为 Keep a Changelog 格式。
 
+## [0.3.0] - 2026-10-23
+
+### 新增
+
+- **强调色预设**：四套生化危机主题配色——绯红（`crimson`，默认）、生化危害绿（`biohazard`）、T-病毒紫（`t-virus`）、保护伞红（`umbrella`），另支持 `custom` 自定义颜色。每套预设通过 OKLab 色彩混合自动派生完整色阶，保持与手工调校的绯红色阶一致的对比度梯度。设置页以色板控件展示，选中态带描边反馈。
+- **底色选项**：三种底色方案——`clinical`（实验室白，默认）、`carbon`（碳黑中性灰）、`official`（保留 Harness 原生底色）。通过 `data-rq-base` 属性切换，不影响深浅色模式的正常联动。
+- **空白页背景**：空白会话页可选四种背景——`hex`（蜂巢六边形网格）、`scanlines`（扫描线）、`full`（完整开屏底）、`off`（关闭），`random` 每次随机。
+- **切回动效**：窗口从后台切回时播放过渡动效——`scan`（链路恢复扫描）、`iris`（六边形光圈）、`glitch`（故障闪切），`random` 每次随机。触发条件可设为 `away`（离开 30 秒后）、`always`（每次切回）或 `hidden`（最小化或隐藏后）。设置页提供「预览切回动效」按钮。
+- **设置页分节重构**：新增「外观」分节（界面主题、品牌替换、标志方案、强调色、底色、空白页背景）和「动效」分节（切回动效、切回触发），与原有的「开屏」「文字」分节并列。
+- **`/redqueen` 命令扩展**：命令菜单新增强调色和底色选项，可直接通过斜杠命令切换。
+
+### 变更
+
+- **界面主题架构升级**：`theme.css` 从裸 `html body` 选择器改为 `html[data-rq-ui] body` 属性驱动模式，与莱茵生命主题对齐。`<html>` 上的 `data-rq-ui`、`data-rq-accent`、`data-rq-base` 三个属性控制主题启停和配色切换，注入脚本在首帧前设置。
+- **`lib/index.js` 注入脚本**：`buildInjections` 新增自执行函数，在 `<html>` 上设置 `data-rq-ui` 属性、`data-rq-accent` / `data-rq-base` 数据属性，以及自定义强调色时的 `--rq-accent-custom` CSS 变量。
+- **配置 schema 扩展**：`Config` 和 `resolveConfig` 新增 `accent`、`accentColor`、`base`、`heroBackground`、`resumeEffect`、`resumeTrigger` 六个字段，含枚举校验和颜色格式校验。
+
 ## [0.2.0] - 2026-10-18
 
 ### 新增

@@ -1,7 +1,7 @@
 {
   "name": "dsh-redqueen-splash",
   "description": "红后开屏动画 — DeepSeek Harness 红后主题：开屏动画、界面配色与品牌标志",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "license": "MIT",
   "repository": {
